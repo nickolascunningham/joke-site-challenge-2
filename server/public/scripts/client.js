@@ -2,64 +2,52 @@ console.log('client.js sourced');
 
 $( document ).ready( onReady );
 
-function getJokes() {
-    const outputDiv = document.getElementById('outputDiv');
-
-    $.get("/jokes", function(data, status){
-        const jokesList = document.createElement('UL');
-        const jokeItemElements =  data.map((joke) => {
-            const jokeItem = document.createElement('LI');
-
-            const whoseJokeElement = document.createElement('P');
-            whoseJokeElement.innerText = joke.whoseJoke;
-
-            const jokeQuestionElement = document.createElement('P');
-            jokeQuestionElement.innerText = joke.jokeQuestion;
-
-            const punchLineElement = document.createElement('P');
-            punchLineElement.innerText = joke.punchLine;
-
-            jokeItem.append(whoseJokeElement, jokeQuestionElement, punchLineElement);
-            return jokeItem;
-        })
-
-        jokesList.append(...jokeItemElements);
-        outputDiv.appendChild(jokesList)
-    });
+function onReady(){
+    getJokes();
+    $(`#addJokeButton`).on('click', addJoke);
 }
+
+function getJokes() {
+    $.ajax({
+        method: 'GET',
+        url: '/jokes'
+    }).then(function (response) {
+        console.log ( 'return:', response.jokes );
+        let el = $( '#jokesReturn' );
+        el.empty();
+        response.jokes.forEach(response => {
+            el.append( `<li> ${response.whoseJoke} ${response.jokeQuestion} ${response.punchLine}<li>`);
+        })
+    }).catch( function ( err ){
+        alert( 'error getJokes' );
+        console.log( err );
+    })
+}
+
 
 function addJoke() {
-    const whoseJokeInput = document.getElementById("whoseJokeIn").value;
-    const questionInput = document.getElementById("questionIn").value;
-    const punchLineInput = document.getElementById("punchlineIn").value;
-
-//     $.post("demo_test_post.asp",
-//   {
-//     name: "Donald Duck",
-//     city: "Duckburg"
-//   },
-//   function(data, status){
-//     alert("Data: " + data + "\nStatus: " + status);
-//   });
-
-    const newJoke = {
-        whoseJoke: whoseJokeInput,
-        questionJoke: questionInput,
-        punchLine: punchLineInput,
+    let objectToSend = {
+        whoseJoke: $(`#whoseJokeIn`).val(),
+        jokeQuestion: $(`#questionIn`).val(),
+        punchLine: $(`#punchlineIn`).val()
     }
+console.log(objectToSend);
 
-    console.log({ newJoke })
-
-    // $.post("/jokes", function(data, status){
-
-    // })
+$.ajax({
+    method: `POST`,
+    url: `/jokes`,
+    data: objectToSend
+})
+.then(function (response){
+    console.log( 'post return', response );
+    $(`#whoseJokeIn`).val('');
+    $(`#questionIn`).val('');
+    $(`#punchlineIn`).val('');
+    getJokes();
+})
+.catch( function (err){
+    alert ( 'error in addJoke' );
+    console.log( err )
+})
 }
 
-function onReady() {
-    console.log('DOM ready');
-    getJokes()
-
-    const addJokeButton = document.getElementById('addJokeButton');
-
-    addJokeButton.onclick = addJoke;
-}

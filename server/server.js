@@ -1,10 +1,20 @@
+// requires
 const express = require( 'express' );
 const app = express();
 const bodyParser = require( 'body-parser' );
-const PORT = 5000;
+
 
 // use bodyParser.urlencoded throughout the app with this:
+app.use(express.static('server/public'));
 app.use(bodyParser.urlencoded({ extended: true }));
+
+//globals
+const PORT = 5000;
+
+//spin up server
+app.listen(PORT, () => {
+  console.log('server running on: ', PORT);
+}); // end spin up server
 
 let jokes = [
   {
@@ -34,22 +44,29 @@ let jokes = [
   }
 ];
 
-// serve back static files
-app.use(express.static('server/public'));
+//routes
 
 app.get('/jokes', (req, res) => {
-  res.status(200).json(jokes);
-})
+  
+  res.send( {jokes} );
 
-app.post('/jokes', (req, res) => {
-  const { whoseJoke, jokeQuestion, punchLine } = req.body;
 
-  const newJoke = { whoseJoke, jokeQuestion, punchLine };
-  jokes.push(newJoke);
+}) //end app.get
 
-  res.status(201).json(jokes);
-})
+app.post('/jokes', (req, res) =>{
 
-app.listen(PORT, () => {
-  console.log('server running on: ', PORT);
-}); // end spin up server
+  jokes.push(req.body);
+  res.status(200).send("success!")
+ 
+  })
+//   el = req.body;
+//   console.log(el);
+// const insertString =  ${el.whoseJoke} 
+
+//   const { whoseJoke, jokeQuestion, punchLine } = req.body;
+
+//   const newJoke = { whoseJoke, jokeQuestion, punchLine };
+//   jokes.push(newJoke);
+
+//   res.status(201).json(jokes);
+// })
